@@ -17,6 +17,22 @@ body {
     background: linear-gradient(45deg, #dfc625, #a8d555);
 }
 
+.buildings {
+    width: 100%;
+}
+
+.building-std {
+    border: 1px solid black;
+}
+
+.building-std:hover {
+    background-color: lightgoldenrodyellow;
+}
+
+.building-std:active {
+    background-color: royalblue;
+}
+
 .clicked {
     animation-duration: 100ms;
     animation-name: click;
