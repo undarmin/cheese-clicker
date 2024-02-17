@@ -118,7 +118,7 @@ setInterval(() => {
   localStorage.setItem("save", saveInitial);
 }, 10000);
 
-if (!localStorage.getItem("save")) {
+if (localStorage.getItem("save") === "undefined" || !localStorage.getItem("save")) {
   localStorage.setItem("save", saveInitial);
   localStorage.getItem(saveInitial);
   Game.init();
