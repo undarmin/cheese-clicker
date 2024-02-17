@@ -82,14 +82,14 @@ Game = {
       nameNode: null,
       numberNode: null,
       buy() {
-        console.log(
-          "oh noes",
-          Game.cheese >= this.cost,
-          Game.cheese,
-          this.cost
-        );
+        //console.log(
+          //"oh noes",
+          //Game.cheese >= this.cost,
+          //Game.cheese,
+          //this.cost
+        //);
         if (Game.cheese >= this.cost) {
-          console.log("oh noes 2");
+          //console.log("oh noes 2");
           Game.cps += this.cps;
           Game.cheese -= this.cost;
           this.cost = roundToN(this.cost * 1.15, 2);
@@ -115,15 +115,15 @@ setInterval(() => {
     let building = Game.buildings[key];
     saveInitial.push(building.cost, building.number);
   }
-  localStorage.setItem("save", saveInitial);
+  localStorage.setItem("save", btoa(String(saveInitial)));
 }, 10000);
 
-if (localStorage.getItem("save") === "undefined" || !localStorage.getItem("save")) {
-  localStorage.setItem("save", saveInitial);
-  localStorage.getItem(saveInitial);
+if (atob(localStorage.getItem("save")) === "undefined" || !localStorage.getItem("save")) {
+    console.log(String(saveInitial))
+  localStorage.setItem("save", btoa(String(saveInitial)));
   Game.init();
 } else {
-  loadSave(localStorage.getItem("save"));
+  loadSave(atob(localStorage.getItem("save")));
 }
 
 function loadSave(save) {
@@ -137,7 +137,7 @@ function loadSave(save) {
     Game.buildings[key1][key2] = saveArr[i];
     key2 = (i % 2) ? "number" : "cost";
     Game.buildings[key1][key2] = saveArr[i+1];
-    console.table({ building: Game.buildings[key1].name, key2, 1:saveArr[i], 2:saveArr[i+1] });
+    //console.table({ building: Game.buildings[key1].name, key2, 1:saveArr[i], 2:saveArr[i+1] });
     i += 2;
   }
   Game.init();
