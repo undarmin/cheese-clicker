@@ -1,6 +1,7 @@
 * {
     margin: 0;
     padding: 0;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif
 }
 
 body {
@@ -22,6 +23,34 @@ body {
 
 .building-std {
     border: 1px solid black;
+}
+.upgrade-std {
+    border: 1px solid black;
+    width: 4rem;
+    height: 4rem;
+    position: relative;
+}
+.upgrade-std-info {
+    background-color: #170d0c;
+    color: white;
+    display: none;
+    width: 10rem;
+    height: 100%;
+}
+
+.upgrade-std-info h1 {
+    font-size: 0.9rem;
+}
+
+.upgrade-std-info p {
+    font-size: 0.6rem;
+}
+
+.upgrade-std:hover .upgrade-std-info {
+    display: block;
+    position: absolute;
+    right: 1rem;
+    bottom: 2rem;
 }
 
 .building-std:hover {
