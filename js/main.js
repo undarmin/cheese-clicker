@@ -13,6 +13,12 @@ const upgradeProgression = [
     description: "Your hands are faster than light! Increases click power by two times.",
     cost: 100,
     exhausted: false
+  },
+  {
+    name: "Reinforced Tails",
+    description: "Rats work twice as fast as now their tails can also make cheese! Increase rat worker production by two times",
+    cost: 444,
+    exhausted: false
   }
 ];
 const buildingProgression = [
@@ -130,11 +136,13 @@ const Game = {
   update() {
     cheeseCount.textContent = roundToN(this.cheese, 2);
     cpsCount.textContent = roundToN(this.cps, 2);
+    Game.cps = 0;
     for (let key in this.buildings) {
       let building = this.buildings[key];
       building.costNode.textContent = "cost: " + building.cost;
       building.numberNode.textContent = "number: " + building.number;
       //   console.log(building);
+      Game.cps += building.cps*building.number;
     }
     for (let key in this.upgrades) {
       let upgrade = this.upgrades[key];
@@ -152,12 +160,20 @@ const Game = {
       case upgradeProgression[0].name:
         return Game.clicks >= 1000;
         break;
+      case upgradeProgression[1].name:
+        return Game.buildings["Rat worker"].number >= 1;
+        break;
     }
   },
   activateUpgrade(upgrade) {
     switch (upgrade.name) {
       case upgradeProgression[0].name:
         Game.clickPower *= 2;
+        Game.update();
+        break;
+      case upgradeProgression[1].name:
+        Game.buildings["Rat worker"].cps *= 2;
+        Game.update();
         break;
     }
   },
@@ -198,7 +214,6 @@ const Game = {
         //);
         if (Game.cheese >= this.cost) {
           //console.log("oh noes 2");
-          Game.cps += this.cps;
           Game.cheese -= this.cost;
           this.cost = roundToN(this.cost * 1.15, 2);
           this.number++;
@@ -305,6 +320,7 @@ function loadSave(save) {
       }
       Game.buildings[key].number = save.buildings[key].number;
       Game.buildings[key].cost = save.buildings[key].cost;
+      Game.buildings[key].cps = save.buildings[key].cps;
     }
     for (let key in save.upgrades) {
       if (!(key in Game.upgrades && key in save.upgrades)) {
