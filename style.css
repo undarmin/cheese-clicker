@@ -18,12 +18,46 @@ body {
 }
 
 .buildings {
-    width: 100%;
+    width: 90%;
+    border: 3px solid black;
 }
 
 .building-std {
     border: 1px solid black;
+    position: relative;
 }
+
+.building-std-hidden {
+    display: none;
+}
+
+.building-std:hover .building-std-hidden {
+    display: block;
+    position: absolute;
+    background-color: #170d0c;
+    color: white;
+    width: 12rem;
+    height: 125%;
+    left: calc(100% - 14rem);
+    bottom: 2rem;
+    padding: 1rem;
+    z-index: 999;
+}
+
+.building-std-hidden h1 {
+    font-size: 0.9rem;
+}
+
+.building-std-hidden p {
+    font-size: 0.7rem;
+}
+.upgrades {
+    width: 80%;
+    border: 3px solid black;
+    display: flex;
+    height: 4rem;
+}
+
 .upgrade-std {
     border: 1px solid black;
     width: 4rem;
@@ -34,12 +68,20 @@ body {
     background-color: #170d0c;
     color: white;
     display: none;
-    width: 10rem;
+    width: 12rem;
     height: 100%;
 }
 
 .upgrade-std-info h1 {
     font-size: 0.9rem;
+}
+
+.upgrade-std-info h2 {
+    font-size: 0.75rem;
+}
+
+.bold {
+    font-weight: 700;
 }
 
 .upgrade-std-info p {
@@ -49,6 +91,7 @@ body {
 .upgrade-std:hover .upgrade-std-info {
     display: block;
     position: absolute;
+    padding: 1rem;
     right: 1rem;
     bottom: 2rem;
 }
