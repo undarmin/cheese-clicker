@@ -4,13 +4,16 @@ const cpsCount = document.querySelector("#cps-count");
 const buildingsBar = document.querySelector(".buildings");
 const upgradesBar = document.querySelector(".upgrades");
 
+const loadButton = document.querySelector("#load-save");
+const saveButton = document.querySelector("#get-save");
+
 function roundToN(num, n) {
   return Math.round(num * 10 ** n) / 10 ** n;
 }
 
 // Game object
 
-Game = {
+const Game = {
   cheese: 0,
   cps: 0,
   clickPower: 1,
@@ -47,18 +50,18 @@ Game = {
     }
     for (let key in this.upgrades) {
       let upgrade = this.upgrades[key];
-      let upgradeNode = upgrade.node = document.createElement("div");
+      let upgradeNode = (upgrade.node = document.createElement("div"));
       upgradeNode.classList.add("upgrade-std");
       let infoNode = document.createElement("div");
       infoNode.classList.add("upgrade-std-info");
       upgradeNode.appendChild(infoNode);
-      let h1 = document.createElement('h1');
+      let h1 = document.createElement("h1");
       h1.textContent = upgrade.name;
-      let desc = document.createElement('p');
+      let desc = document.createElement("p");
       desc.textContent = upgrade.description;
       infoNode.appendChild(h1);
       infoNode.appendChild(desc);
-      upgradesBar.appendChild(upgradeNode)
+      upgradesBar.appendChild(upgradeNode);
       upgradeNode.addEventListener("click", () => upgrade.buy());
       upgradeNode.style.display = "none";
     }
@@ -89,16 +92,14 @@ Game = {
         return Game.clicks >= 1000;
         break;
     }
-  }
-  ,
+  },
   activateUpgrade(upgrade) {
     switch (upgrade.name) {
       case "Butter Fingers":
         Game.clickPower *= 2;
         break;
     }
-  }
-  ,
+  },
   click() {
     this.earn(this.clickPower);
     this.update();
@@ -170,47 +171,101 @@ Game.addBuilding("Hamster worker", 1, 100);
 Game.addBuilding("Dairy", 15, 1000);
 Game.addBuilding("Factory", 102, 12000);
 
-Game.addUpgrade("Butter Fingers", "Increases your click power by 2 times, for a little butter may do a lot...", 1, false);
+Game.addUpgrade(
+  "Butter Fingers",
+  "Increases your click power by 2 times, for a little butter may do a lot...",
+  1,
+  false
+);
 
-// // initial save
-// let saveInitial;
-// setInterval(() => {
-//   saveInitial = [Game.cheese, Game.cps, Game.clickPower];
-//   for (key in Game.buildings) {
-//     let building = Game.buildings[key];
-//     saveInitial.push(building.cost, building.number);
-//   }
-//   localStorage.setItem("save", btoa(String(saveInitial)));
-// }, 10000);
+// game save
 
-// if (
-//   atob(localStorage.getItem("save")) === "undefined" ||
-//   !localStorage.getItem("save")
-// ) {
-//   console.log(String(saveInitial));
-//   localStorage.setItem("save", btoa(String(saveInitial)));
-//   Game.init();
-// } else {
-//   loadSave(atob(localStorage.getItem("save")));
-// }
+const initialSave = {
+  cheese: Game.cheese,
+  cps: Game.cps,
+  clicks: Game.clicks,
+  clickPower: Game.clickPower,
+  buildings: Game.buildings,
+  upgrades: Game.upgrades,
+};
 
-// function loadSave(save) {
-//   saveArr = save.split(",");
-//   Game.cheese = +saveArr[0];
-//   Game.cps = +saveArr[1];
-//   Game.clickPower = +saveArr[2];
-//   let i = 3;
-//   for (key1 in Game.buildings) {
-//     let key2 = !(i % 2) ? "number" : "cost";
-//     Game.buildings[key1][key2] = saveArr[i];
-//     key2 = i % 2 ? "number" : "cost";
-//     Game.buildings[key1][key2] = saveArr[i + 1];
-//     //console.table({ building: Game.buildings[key1].name, key2, 1:saveArr[i], 2:saveArr[i+1] });
-//     i += 2;
-//   }
-//   Game.init();
-//   Game.update();
-// }
+let saveCipher = btoa(JSON.stringify(initialSave));
+
+setInterval(() => {
+  updateSave();
+}, 5000);
+
+function updateSave() {
+  initialSave.cheese = Game.cheese;
+  initialSave.cps = Game.cps;
+  initialSave.clicks = Game.clicks;
+  initialSave.clickPower = Game.clickPower;
+  initialSave.buildings = Game.buildings;
+  initialSave.upgrades = Game.upgrades;
+  saveCipher = btoa(JSON.stringify(initialSave));
+  localStorage.setItem("save", saveCipher);
+}
+
+function getSave() {
+  if (localStorage.getItem("save")) {
+    let save = localStorage.getItem("save");
+    try {
+      loadSave(
+        JSON.parse(atob(save))
+      );
+    } catch (err) {
+      localStorage.setItem("save", saveCipher);
+    }
+  }
+}
+
+function loadSave(save) {
+  if (
+    "cheese" in save &&
+    "cps" in save &&
+    "clicks" in save &&
+    "clickPower" in save &&
+    "buildings" in save &&
+    "upgrades" in save
+  ) {
+    Game.cheese = save.cheese;
+    Game.cps = save.cps;
+    Game.clicks = save.clicks;
+    Game.clickPower = save.clickPower;
+    for (let key in save.buildings) {
+      if (!(key in Game.buildings && key in save.buildings)) {
+        continue;
+      }
+      Game.buildings[key].number = save.buildings[key].number;
+      Game.buildings[key].cost = save.buildings[key].cost;
+    }
+    for (let key in save.upgrades) {
+      if (!(key.exhausted in Game.upgrades && key in save.upgrades)) {
+        continue;
+      }
+      Game.upgrades[key].exhausted = save.upgrades[key].exhausted;
+    }
+  } else {
+    return "Invalid Save File";
+  }
+  Game.update();
+  return "Loaded Successfully!";
+}
+
+loadButton.addEventListener("click", () => {
+  let save = prompt("Whatcha save?");
+  if (save) {
+    alert(
+      loadSave(
+        JSON.parse(atob(save))
+      )
+    );
+  }
+});
+
+saveButton.addEventListener("click", () => {
+  alert("your save is: " + saveCipher);
+})
 
 cheese.addEventListener("click", () => {
   cheese.classList.add("clicked");
@@ -221,5 +276,6 @@ cheese.addEventListener("click", () => {
   Game.click();
 });
 
+window.onload = () => getSave();
 Game.production();
 Game.init();
