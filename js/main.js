@@ -7,6 +7,53 @@ const upgradesBar = document.querySelector(".upgrades");
 const loadButton = document.querySelector("#load-save");
 const saveButton = document.querySelector("#get-save");
 
+const upgradeProgression = [
+  {
+    name: "Cheesy Fingers",
+    description: "Your hands are faster than light! Increases click power by two times.",
+    cost: 100,
+    exhausted: false
+  }
+];
+const buildingProgression = [
+  {
+    name: "Rat worker",
+    cps: 0.1,
+    cost: 15,
+    description: "A rat to make you some fresh cheese! He may eat some cheese though, and he's kinda lazy."
+  },
+  {
+    name: "Hamster worker",
+    cps: 1,
+    cost: 100,
+    description: "A hamster! Faster than a rat and doesn't like cheese as much, but they are more expensive and love living a lavish lifestyle!"
+  },
+  {
+    name: "Farmer",
+    cps: 5,
+    cost: 250,
+    description: "He's one of us, he can understand you better and work faster!"
+  },
+  {
+    name: "Cattle farm",
+    cps: 15,
+    cost: 1000,
+    description: "FRESH FRESH MILKSIES"
+  },
+  {
+    name: "Dairy",
+    cps: 30,
+    cost: 5000,
+    description: "A whole dairy, you have it in your hands and you shall rule the world with it soon enough."
+  },
+  {
+    name: "Factory",
+    cps: 102,
+    cost: 12000,
+    description: "We all hate child labour, but you love rat labour :)."
+  }
+];
+
 function roundToN(num, n) {
   return Math.round(num * 10 ** n) / 10 ** n;
 }
@@ -34,11 +81,21 @@ const Game = {
       let number = (building.numberNode = document.createElement("p"));
       building.numberNode.textContent = number.textContent =
         "number: " + building.number;
+      let hiddenNode = document.createElement("div");
+      hiddenNode.classList.add("building-std-hidden");
+      let name2 = document.createElement("h1");
+      name2.textContent = building.name;
+      hiddenNode.appendChild(name2);
+      let desc = document.createElement("p");
+      desc.classList.add("small");
+      desc.textContent = building.description;
+      hiddenNode.appendChild(desc);
 
       buildingNode.appendChild(name);
       buildingNode.appendChild(cost);
       buildingNode.appendChild(cps);
       buildingNode.appendChild(number);
+      buildingNode.appendChild(hiddenNode);
       buildingNode.classList.add("building-std");
       buildingsBar.appendChild(buildingNode);
 
@@ -57,9 +114,13 @@ const Game = {
       upgradeNode.appendChild(infoNode);
       let h1 = document.createElement("h1");
       h1.textContent = upgrade.name;
+      let cost = document.createElement("h2");
+      cost.classList.add("bold");
+      cost.textContent = upgrade.cost + " cheese";
       let desc = document.createElement("p");
       desc.textContent = upgrade.description;
       infoNode.appendChild(h1);
+      infoNode.appendChild(cost);
       infoNode.appendChild(desc);
       upgradesBar.appendChild(upgradeNode);
       upgradeNode.addEventListener("click", () => upgrade.buy());
@@ -88,14 +149,14 @@ const Game = {
   },
   showUpgrade(upgrade) {
     switch (upgrade.name) {
-      case "Butter Fingers":
+      case upgradeProgression[0].name:
         return Game.clicks >= 1000;
         break;
     }
   },
   activateUpgrade(upgrade) {
     switch (upgrade.name) {
-      case "Butter Fingers":
+      case upgradeProgression[0].name:
         Game.clickPower *= 2;
         break;
     }
@@ -117,11 +178,12 @@ const Game = {
   earn(cheese) {
     this.cheese += cheese;
   },
-  addBuilding(name, cps, cost) {
+  addBuilding(name, cps, cost, description) {
     this.buildings[name] = {
       name,
       cps,
       cost,
+      description,
       number: 0,
       costNode: null,
       cpsNode: null,
@@ -166,17 +228,13 @@ const Game = {
   upgrades: {},
 };
 
-Game.addBuilding("Rat worker", 0.1, 15);
-Game.addBuilding("Hamster worker", 1, 100);
-Game.addBuilding("Dairy", 15, 1000);
-Game.addBuilding("Factory", 102, 12000);
+buildingProgression.forEach((building) => {
+  Game.addBuilding(building.name, building.cps, building.cost, building.description);
+})
 
-Game.addUpgrade(
-  "Butter Fingers",
-  "Increases your click power by 2 times, for a little butter may do a lot...",
-  1,
-  false
-);
+upgradeProgression.forEach((upgrade) => {
+  Game.addUpgrade(upgrade.name, upgrade.description, upgrade.cost, upgrade.exhausted);
+})
 
 // game save
 
@@ -194,6 +252,11 @@ let saveCipher = btoa(JSON.stringify(initialSave));
 setInterval(() => {
   updateSave();
 }, 5000);
+
+function wipeSave() {
+  localStorage.setItem("save", "");
+  getSave();
+}
 
 function updateSave() {
   initialSave.cheese = Game.cheese;
@@ -216,6 +279,10 @@ function getSave() {
     } catch (err) {
       localStorage.setItem("save", saveCipher);
     }
+  } else {
+    localStorage.setItem("save", `eyJjaGVlc2UiOjAsImNwcyI6MCwiY2xpY2tzIjowLCJjbGlja1Bvd2VyIjoxLCJidWlsZGluZ3MiOnsiUmF0IHdvcmtlciI6eyJuYW1lIjoiUmF0IHdvcmtlciIsImNwcyI6MC4xLCJjb3N0IjoxNSwibnVtYmVyIjowLCJjb3N0Tm9kZSI6e30sImNwc05vZGUiOnt9LCJuYW1lTm9kZSI6e30sIm51bWJlck5vZGUiOnt9fSwiSGFtc3RlciB3b3JrZXIiOnsibmFtZSI6IkhhbXN0ZXIgd29ya2VyIiwiY3BzIjoxLCJjb3N0IjoxMDAsIm51bWJlciI6MCwiY29zdE5vZGUiOnt9LCJjcHNOb2RlIjp7fSwibmFtZU5vZGUiOnt9LCJudW1iZXJOb2RlIjp7fX0sIkRhaXJ5Ijp7Im5hbWUiOiJEYWlyeSIsImNwcyI6MTUsImNvc3QiOjEwMCwibnVtYmVyIjowLCJjb3N0Tm9kZSI6e30sImNwc05vZGUiOnt9LCJuYW1lTm9kZSI6e30sIm51bWJlck5vZGUiOnt9fSwiRmFjdG9yeSI6eyJuYW1lIjoiRmFjdG9yeSIsImNwcyI6MTAyLCJjb3N0IjoxMjAwMCwibnVtYmVyIjowLCJjb3N0Tm9kZSI6e30sImNwc05vZGUiOnt9LCJuYW1lTm9kZSI6e30sIm51bWJlck5vZGUiOnt9fX0sInVwZ3JhZGVzIjp7IkNoZWVzeSBGaW5nZXJzIjp7Im5hbWUiOiJDaGVlc3kgRmluZ2VycyIsImRlc2NyaXB0aW9uIjoiWW91ciBoYW5kcyBhcmUgZmFzdGVyIHRoYW4gbGlnaHQhIEluY3JlYXNlcyBjbGljayBwb3dlciBieSB0d28gdGltZXMuIiwiY29zdCI6MTAwLCJub2RlIjp7fSwiZXhoYXVzdGVkIjpmYWxzZX19fQ==`);
+    getSave();
+  
   }
 }
 
@@ -240,7 +307,7 @@ function loadSave(save) {
       Game.buildings[key].cost = save.buildings[key].cost;
     }
     for (let key in save.upgrades) {
-      if (!(key.exhausted in Game.upgrades && key in save.upgrades)) {
+      if (!(key in Game.upgrades && key in save.upgrades)) {
         continue;
       }
       Game.upgrades[key].exhausted = save.upgrades[key].exhausted;
