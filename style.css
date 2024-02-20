@@ -28,6 +28,7 @@ button:hover {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    /* padding-top: 8rem; */
 }
 
 body {
@@ -38,8 +39,8 @@ body {
 }
 
 #cheese {
-    width: 8rem;
-    height: 8rem;
+    width: 16rem;
+    height: 16rem;
 }
 
 .thebar {
@@ -57,6 +58,23 @@ body {
 .building-std {
     border: 1px solid black;
     position: relative;
+    height: 3lh;
+    font-size: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.building-std span:nth-child(2) {
+    font-size: 3rem;
+}
+
+.building-std span:nth-child(3) {
+    font-size: 2.0rem;
+}
+
+.building-std span:nth-child(4) {
+    margin-left: auto;
 }
 
 .building-std-hidden {
@@ -69,7 +87,7 @@ body {
     background-color: #170d0c;
     color: white;
     width: 12rem;
-    height: 125%;
+    height: 6rem;
     left: calc(100% - 14rem);
     bottom: 2rem;
     padding: 1rem;
