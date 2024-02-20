@@ -10,58 +10,73 @@ const saveButton = document.querySelector("#get-save");
 const upgradeProgression = [
   {
     name: "Cheesy Fingers",
-    description: "Your hands are faster than light! Increases click power by two times.",
+    description:
+      "Your hands are faster than light! Increases click power by two times.",
     cost: 100,
-    exhausted: false
+    exhausted: false,
   },
   {
     name: "Reinforced Tails",
-    description: "Rats work twice as fast as now their tails can also make cheese! Increase rat worker production by two times",
+    description:
+      "Rats work twice as fast as now their tails can also make cheese! Increase rat worker production by two times",
     cost: 444,
-    exhausted: false
-  }
+    exhausted: false,
+  },
 ];
 const buildingProgression = [
   {
     name: "Rat worker",
     cps: 0.1,
     cost: 15,
-    description: "A rat to make you some fresh cheese! He may eat some cheese though, and he's kinda lazy."
+    description:
+      "A rat to make you some fresh cheese! He may eat some cheese though, and he's kinda lazy.",
   },
   {
     name: "Hamster worker",
     cps: 1,
     cost: 100,
-    description: "A hamster! Faster than a rat and doesn't like cheese as much, but they are more expensive and love living a lavish lifestyle!"
+    description:
+      "A hamster! Faster than a rat and doesn't like cheese as much, but they are more expensive and love living a lavish lifestyle!",
   },
   {
     name: "Farmer",
     cps: 5,
     cost: 250,
-    description: "He's one of us, he can understand you better and work faster!"
+    description:
+      "He's one of us, he can understand you better and work faster!",
   },
   {
     name: "Cattle farm",
     cps: 15,
     cost: 1000,
-    description: "FRESH FRESH MILKSIES"
+    description: "FRESH FRESH MILKSIES",
   },
   {
     name: "Dairy",
     cps: 30,
     cost: 5000,
-    description: "A whole dairy, you have it in your hands and you shall rule the world with it soon enough."
+    description:
+      "A whole dairy, you have it in your hands and you shall rule the world with it soon enough.",
   },
   {
     name: "Factory",
     cps: 102,
     cost: 12000,
-    description: "We all hate child labour, but you love rat labour :)."
-  }
+    description: "We all hate child labour, but you love rat labour :).",
+  },
 ];
 
 function roundToN(num, n) {
   return Math.round(num * 10 ** n) / 10 ** n;
+}
+
+function random(min, max) {
+  if (min > max) {
+    let l = min;
+    min = max;
+    max = l;
+  }
+  return Math.random() * (max - min) + min;
 }
 
 // Game object
@@ -71,6 +86,7 @@ const Game = {
   cps: 0,
   clickPower: 1,
   clicks: 0,
+  multiplier: 1,
   init() {
     for (let key in this.buildings) {
       // create building node
@@ -137,12 +153,29 @@ const Game = {
     cheeseCount.textContent = roundToN(this.cheese, 2);
     cpsCount.textContent = roundToN(this.cps, 2);
     Game.cps = 0;
+    this.buffs.forEach((buff) => {
+      switch (buff.type) {
+        case "production":
+          this.multiplier *= buff.multiplier;
+          Game.buffs.splice(
+            Game.buffs.indexOf(buff), 1
+          );
+          setTimeout(() => {
+            this.multiplier /= buff.multiplier;
+            console.log("Buff has ended");
+          }, 10000);
+          break;
+      }
+    });
     for (let key in this.buildings) {
       let building = this.buildings[key];
       building.costNode.textContent = "cost: " + building.cost;
       building.numberNode.textContent = "number: " + building.number;
+      if (building.cps !== this.multiplier * building.baseCPS) {
+        building.cps = building.baseCPS * this.multiplier;
+      }
       //   console.log(building);
-      Game.cps += building.cps*building.number;
+      Game.cps += building.cps * building.number;
     }
     for (let key in this.upgrades) {
       let upgrade = this.upgrades[key];
@@ -178,7 +211,7 @@ const Game = {
     }
   },
   click() {
-    this.earn(this.clickPower);
+    this.earn(this.clickPower * this.multiplier);
     this.update();
   },
   production() {
@@ -186,7 +219,7 @@ const Game = {
       for (let key in this.buildings) {
         building = this.buildings[key];
         // console.table({cookies:Game.cheese, cps:building.cps, number:building.number})
-        Game.cheese += building.cps * building.number;
+        this.earn(building.cps * building.number);
         this.update();
       }
     }, 1000);
@@ -198,6 +231,7 @@ const Game = {
     this.buildings[name] = {
       name,
       cps,
+      baseCPS: cps,
       cost,
       description,
       number: 0,
@@ -241,15 +275,73 @@ const Game = {
     };
   },
   upgrades: {},
+  activateBuff(buff) {
+    this.buffs.push(buff);
+    this.update();
+  }
+  ,
+  newBuff(name) {
+    let buff;
+    switch (name) {
+      case "Cheese Curds":
+        buff = {
+          name: "Cheese Curds",
+          multiplier: 11,
+          type: "production",
+          duration: 71000,
+        };
+        break;
+    }
+    let j = buff;
+    return j;
+  },
+  createBuff(buff) {
+    let buffnode = document.createElement("div");
+    buffnode.style.backgroundColor = "yellow";
+    buffnode.style.position = "absolute";
+    buffnode.style.width = "100px";
+    buffnode.style.height = "100px";
+    buffnode.style.top = `${random(
+      window.innerHeight - 100, 0
+    )}px`;
+    buffnode.style.left = `${random(
+      window.innerWidth - 100, 0
+    )}px`;
+    let buffn = this.newBuff(buff);
+    document.body.appendChild(buffnode);
+    buffnode.addEventListener('click', () => {
+      document.body.removeChild(buffnode);
+      this.activateBuff(buffn);
+    })
+    return buffn;
+  },
+  buffs: [],
 };
 
+setInterval(
+  () => {
+    let buffn = "Cheese Curds";
+    let buff = Game.createBuff(buffn);
+  }
+  , 100000000)
+
 buildingProgression.forEach((building) => {
-  Game.addBuilding(building.name, building.cps, building.cost, building.description);
-})
+  Game.addBuilding(
+    building.name,
+    building.cps,
+    building.cost,
+    building.description
+  );
+});
 
 upgradeProgression.forEach((upgrade) => {
-  Game.addUpgrade(upgrade.name, upgrade.description, upgrade.cost, upgrade.exhausted);
-})
+  Game.addUpgrade(
+    upgrade.name,
+    upgrade.description,
+    upgrade.cost,
+    upgrade.exhausted
+  );
+});
 
 // game save
 
@@ -288,16 +380,16 @@ function getSave() {
   if (localStorage.getItem("save")) {
     let save = localStorage.getItem("save");
     try {
-      loadSave(
-        JSON.parse(atob(save))
-      );
+      loadSave(JSON.parse(atob(save)));
     } catch (err) {
       localStorage.setItem("save", saveCipher);
     }
   } else {
-    localStorage.setItem("save", `eyJjaGVlc2UiOjAsImNwcyI6MCwiY2xpY2tzIjowLCJjbGlja1Bvd2VyIjoxLCJidWlsZGluZ3MiOnsiUmF0IHdvcmtlciI6eyJuYW1lIjoiUmF0IHdvcmtlciIsImNwcyI6MC4xLCJjb3N0IjoxNSwibnVtYmVyIjowLCJjb3N0Tm9kZSI6e30sImNwc05vZGUiOnt9LCJuYW1lTm9kZSI6e30sIm51bWJlck5vZGUiOnt9fSwiSGFtc3RlciB3b3JrZXIiOnsibmFtZSI6IkhhbXN0ZXIgd29ya2VyIiwiY3BzIjoxLCJjb3N0IjoxMDAsIm51bWJlciI6MCwiY29zdE5vZGUiOnt9LCJjcHNOb2RlIjp7fSwibmFtZU5vZGUiOnt9LCJudW1iZXJOb2RlIjp7fX0sIkRhaXJ5Ijp7Im5hbWUiOiJEYWlyeSIsImNwcyI6MTUsImNvc3QiOjEwMCwibnVtYmVyIjowLCJjb3N0Tm9kZSI6e30sImNwc05vZGUiOnt9LCJuYW1lTm9kZSI6e30sIm51bWJlck5vZGUiOnt9fSwiRmFjdG9yeSI6eyJuYW1lIjoiRmFjdG9yeSIsImNwcyI6MTAyLCJjb3N0IjoxMjAwMCwibnVtYmVyIjowLCJjb3N0Tm9kZSI6e30sImNwc05vZGUiOnt9LCJuYW1lTm9kZSI6e30sIm51bWJlck5vZGUiOnt9fX0sInVwZ3JhZGVzIjp7IkNoZWVzeSBGaW5nZXJzIjp7Im5hbWUiOiJDaGVlc3kgRmluZ2VycyIsImRlc2NyaXB0aW9uIjoiWW91ciBoYW5kcyBhcmUgZmFzdGVyIHRoYW4gbGlnaHQhIEluY3JlYXNlcyBjbGljayBwb3dlciBieSB0d28gdGltZXMuIiwiY29zdCI6MTAwLCJub2RlIjp7fSwiZXhoYXVzdGVkIjpmYWxzZX19fQ==`);
+    localStorage.setItem(
+      "save",
+      `eyJjaGVlc2UiOjAsImNwcyI6MCwiY2xpY2tzIjowLCJjbGlja1Bvd2VyIjoxLCJidWlsZGluZ3MiOnsiUmF0IHdvcmtlciI6eyJuYW1lIjoiUmF0IHdvcmtlciIsImNwcyI6MC4xLCJjb3N0IjoxNSwibnVtYmVyIjowLCJjb3N0Tm9kZSI6e30sImNwc05vZGUiOnt9LCJuYW1lTm9kZSI6e30sIm51bWJlck5vZGUiOnt9fSwiSGFtc3RlciB3b3JrZXIiOnsibmFtZSI6IkhhbXN0ZXIgd29ya2VyIiwiY3BzIjoxLCJjb3N0IjoxMDAsIm51bWJlciI6MCwiY29zdE5vZGUiOnt9LCJjcHNOb2RlIjp7fSwibmFtZU5vZGUiOnt9LCJudW1iZXJOb2RlIjp7fX0sIkRhaXJ5Ijp7Im5hbWUiOiJEYWlyeSIsImNwcyI6MTUsImNvc3QiOjEwMCwibnVtYmVyIjowLCJjb3N0Tm9kZSI6e30sImNwc05vZGUiOnt9LCJuYW1lTm9kZSI6e30sIm51bWJlck5vZGUiOnt9fSwiRmFjdG9yeSI6eyJuYW1lIjoiRmFjdG9yeSIsImNwcyI6MTAyLCJjb3N0IjoxMjAwMCwibnVtYmVyIjowLCJjb3N0Tm9kZSI6e30sImNwc05vZGUiOnt9LCJuYW1lTm9kZSI6e30sIm51bWJlck5vZGUiOnt9fX0sInVwZ3JhZGVzIjp7IkNoZWVzeSBGaW5nZXJzIjp7Im5hbWUiOiJDaGVlc3kgRmluZ2VycyIsImRlc2NyaXB0aW9uIjoiWW91ciBoYW5kcyBhcmUgZmFzdGVyIHRoYW4gbGlnaHQhIEluY3JlYXNlcyBjbGljayBwb3dlciBieSB0d28gdGltZXMuIiwiY29zdCI6MTAwLCJub2RlIjp7fSwiZXhoYXVzdGVkIjpmYWxzZX19fQ==`
+    );
     getSave();
-  
   }
 }
 
@@ -338,17 +430,13 @@ function loadSave(save) {
 loadButton.addEventListener("click", () => {
   let save = prompt("Whatcha save?");
   if (save) {
-    alert(
-      loadSave(
-        JSON.parse(atob(save))
-      )
-    );
+    alert(loadSave(JSON.parse(atob(save))));
   }
 });
 
 saveButton.addEventListener("click", () => {
   alert("your save is: " + saveCipher);
-})
+});
 
 cheese.addEventListener("click", () => {
   cheese.classList.add("clicked");
