@@ -74,7 +74,8 @@ const buildingProgression = [
     cost: 5000,
     description:
       "A whole dairy, you have it in your hands and you shall rule the world with it soon enough.",
-  },
+  url: "./assets/dairy.webp"
+    },
   {
     name: "Factory",
     cps: 102,
@@ -135,30 +136,35 @@ const Game = {
       let building = this.buildings[key];
       let buildingNode = document.createElement("div");
 
-      let name = (building.nameNode = document.createElement("p"));
+      let name = (building.nameNode = document.createElement("span"));
       building.nameNode.textContent = name.textContent = building.name;
-      let cost = (building.costNode = document.createElement("p"));
+      let cost = (building.costNode = document.createElement("span"));
       building.costNode.textContent = cost.textContent =
-        "cost: " + building.cost;
-      let cps = (building.cpsNode = document.createElement("p"));
-      building.cpsNode.textContent = cps.textContent = "cps: " + building.cps;
-      let number = (building.numberNode = document.createElement("p"));
+        building.cost + "🧀";
+      let cps = (building.cpsNode = document.createElement("span"));
+      building.cpsNode.textContent = cps.textContent = "cps: " + building.baseCPS;
+      let number = (building.numberNode = document.createElement("span"));
       building.numberNode.textContent = number.textContent =
-        "number: " + building.number;
+        building.number;
       let hiddenNode = document.createElement("div");
+      let img = document.createElement("img");
+      img.src = building.url;
+      img.style.height = "3lh";
+      img.style.width = '3lh';
       hiddenNode.classList.add("building-std-hidden");
       let name2 = document.createElement("h1");
       name2.textContent = building.name;
       hiddenNode.appendChild(name2);
+      hiddenNode.appendChild(cps)
       let desc = document.createElement("p");
       desc.classList.add("small");
       desc.textContent = building.description;
       hiddenNode.appendChild(desc);
 
+      buildingNode.appendChild(img);
+      buildingNode.appendChild(number);
       buildingNode.appendChild(name);
       buildingNode.appendChild(cost);
-      buildingNode.appendChild(cps);
-      buildingNode.appendChild(number);
       buildingNode.appendChild(hiddenNode);
       buildingNode.classList.add("building-std");
       buildingsBar.appendChild(buildingNode);
@@ -227,8 +233,9 @@ const Game = {
     });
     for (let key in this.buildings) {
       let building = this.buildings[key];
-      building.costNode.textContent = "cost: " + building.cost;
-      building.numberNode.textContent = "number: " + building.number;
+      building.costNode.textContent = building.cost + "🧀";
+      building.numberNode.textContent = building.number;
+      building.cpsNode.textContent = "cps: " + building.baseCPS;
       if (building.cps !== this.multiplier * building.baseCPS) {
         building.cps = building.baseCPS * this.multiplier;
       }
@@ -292,7 +299,7 @@ const Game = {
   earn(cheese) {
     this.cheese += cheese;
   },
-  addBuilding(name, cps, cost, description) {
+  addBuilding(name, cps, cost, description, url="") {
     this.buildings[name] = {
       name,
       cps,
@@ -304,6 +311,7 @@ const Game = {
       cpsNode: null,
       nameNode: null,
       numberNode: null,
+      url,
       buy() {
         //console.log(
         //"oh noes",
@@ -416,7 +424,8 @@ buildingProgression.forEach((building) => {
     building.name,
     building.cps,
     building.cost,
-    building.description
+    building.description,
+    building.url
   );
 });
 
@@ -500,6 +509,7 @@ function loadSave(save) {
       Game.buildings[key].number = save.buildings[key].number;
       Game.buildings[key].cost = save.buildings[key].cost;
       Game.buildings[key].cps = save.buildings[key].cps;
+      Game.buildings[key].baseCPS = save.buildings[key].baseCPS;
     }
     for (let key in save.upgrades) {
       if (!(key in Game.upgrades && key in save.upgrades)) {
