@@ -10,20 +10,35 @@ const saveButton = document.querySelector("#get-save");
 const buffdesc = document.querySelector("#buff-desc");
 
 const upgradeProgression = [
+  // click upgrades
   {
     name: "Cheesy Fingers",
     description:
       "Your hands are faster than light! Increases click power by two times.",
     cost: 100,
     exhausted: false,
+    url: "./assets/cheesy_fingers.webp"
   },
+  // rat upgrades
   {
     name: "Reinforced Tails",
     description:
       "Rats work twice as fast as now their tails can also make cheese! Increase rat worker production by two times",
+    cost: 88,
+    exhausted: false,
+  },
+  {
+    name: "Lazer Eyes",
+    description: "They have lazer eyes now???? Doubles rat production",
     cost: 444,
     exhausted: false,
   },
+  {
+    name: "Electric Tails",
+    description: "You might as well call 'em pikachu now. \nDoubles rat production.",
+    cost: 888,
+    exhausted: false,
+  }
 ];
 const buildingProgression = [
   {
@@ -65,6 +80,30 @@ const buildingProgression = [
     cps: 102,
     cost: 12000,
     description: "We all hate child labour, but you love rat labour :).",
+  },
+  {
+    name: "Warehouse",
+    cps: 1122,
+    cost: 112233,
+    description: "A place to store your cheese, it might rot but who cares we are capitalists now!",
+  },
+  {
+    name: "Bank",
+    cps: 14141,
+    cost: 1441144,
+    description: "People take cheese loans and cheese are stored here, the interest rate is pretty low but you're popular!"
+  },
+  {
+    name: "Mueseum",
+    cps: 102011,
+    cost: 10203040,
+    description: "Apparently people are interested in the history of cheese, well that's more profit for you"
+  },
+  {
+    name: "Temple",
+    cps: 1920119,
+    cost: 250000000,
+    description: "People pray to cookie gods to give them cookies here!"
   },
 ];
 
@@ -134,6 +173,10 @@ const Game = {
       let upgrade = this.upgrades[key];
       let upgradeNode = (upgrade.node = document.createElement("div"));
       upgradeNode.classList.add("upgrade-std");
+      if (upgrade.url) {
+        upgradeNode.style.backgroundImage = `url(${upgrade.url})`;
+        upgradeNode.style.backgroundSize = `contain`;
+      }
       let infoNode = document.createElement("div");
       infoNode.classList.add("upgrade-std-info");
       upgradeNode.appendChild(infoNode);
@@ -208,7 +251,13 @@ const Game = {
         return Game.clicks >= 1000;
         break;
       case upgradeProgression[1].name:
-        return Game.buildings["Rat worker"].number >= 1;
+        return Game.buildings["Rat worker"].number >= 5;
+        break;
+      case upgradeProgression[2].name:
+        return Game.buildings["Rat worker"].number >= 10;
+        break;
+      case upgradeProgression[3].name:
+        return Game.buildings["Rat worker"].number >= 25;
         break;
     }
   },
@@ -219,7 +268,9 @@ const Game = {
         Game.update();
         break;
       case upgradeProgression[1].name:
-        Game.buildings["Rat worker"].cps *= 2;
+      case upgradeProgression[2].name:
+      case upgradeProgression[3].name:
+        Game.buildings["Rat worker"].baseCPS *= 2;
         Game.update();
         break;
     }
@@ -271,20 +322,21 @@ const Game = {
     };
   },
   buildings: {},
-  addUpgrade(name, description, cost, exhausted) {
+  addUpgrade(name, description, cost, exhausted, url="") {
     this.upgrades[name] = {
       name,
       description,
       cost,
       node: null,
       exhausted,
+      url,
       shown: false,
       buy() {
         if (Game.cheese >= this.cost) {
           Game.cheese -= this.cost;
-          this.exhausted = true;
           Game.activateUpgrade(this);
           Game.update();
+          this.exhausted = true;
         }
       },
     };
@@ -373,7 +425,8 @@ upgradeProgression.forEach((upgrade) => {
     upgrade.name,
     upgrade.description,
     upgrade.cost,
-    upgrade.exhausted
+    upgrade.exhausted,
+    upgrade.url
   );
 });
 
