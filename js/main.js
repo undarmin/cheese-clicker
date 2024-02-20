@@ -7,6 +7,8 @@ const upgradesBar = document.querySelector(".upgrades");
 const loadButton = document.querySelector("#load-save");
 const saveButton = document.querySelector("#get-save");
 
+const buffdesc = document.querySelector("#buff-desc");
+
 const upgradeProgression = [
   {
     name: "Cheesy Fingers",
@@ -87,6 +89,7 @@ const Game = {
   clickPower: 1,
   clicks: 0,
   multiplier: 1,
+  clickMultiplier: 1,
   init() {
     for (let key in this.buildings) {
       // create building node
@@ -163,7 +166,19 @@ const Game = {
           setTimeout(() => {
             this.multiplier /= buff.multiplier;
             console.log("Buff has ended");
-          }, 10000);
+          }, buff.duration);
+          break;
+
+
+        case "click":
+          this.clickMultiplier *= buff.multiplier;
+          Game.buffs.splice(
+            Game.buffs.indexOf(buff), 1
+          );
+          setTimeout(() => {
+            this.clickMultiplier /= buff.multiplier;
+            console.log("Buff has ended");
+          }, buff.duration);
           break;
       }
     });
@@ -211,7 +226,7 @@ const Game = {
     }
   },
   click() {
-    this.earn(this.clickPower * this.multiplier);
+    this.earn(this.clickPower * this.multiplier * this.clickMultiplier);
     this.update();
   },
   production() {
@@ -291,6 +306,14 @@ const Game = {
           duration: 71000,
         };
         break;
+      case "Mozzarella Sticks":
+        buff = {
+          name: "Mozzarella Sticks",
+          multiplier: 1111,
+          type: "click",
+          duration: 11000,
+        }
+        break;
     }
     let j = buff;
     return j;
@@ -312,6 +335,15 @@ const Game = {
     buffnode.addEventListener('click', () => {
       document.body.removeChild(buffnode);
       this.activateBuff(buffn);
+      let r = document.createElement('span');
+      r.textContent =
+      `${buffn.name}! ${
+      buffn.multiplier}x ${buffn.type} for ${buffn.duration / 1000} seconds!`
+      buffdesc.appendChild(r);
+      setTimeout(
+        () => {
+          buffdesc.removeChild(r);
+        }, buffn.duration)
     })
     return buffn;
   },
@@ -320,10 +352,12 @@ const Game = {
 
 setInterval(
   () => {
-    let buffn = "Cheese Curds";
+    let buffn = (random(0, 1) > 0.5) ?  
+    "Cheese Curds" :
+    "Mozzarella Sticks";
     let buff = Game.createBuff(buffn);
   }
-  , 100000000)
+  , 300000)
 
 buildingProgression.forEach((building) => {
   Game.addBuilding(
