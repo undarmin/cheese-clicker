@@ -58,7 +58,58 @@ const upgradeProgression = [
   {
     name: "Hamster Wheel",
     description: "A nice hamster wheel for your hamsters to exercise. \nDoubles hamster production,",
-    cost: 100
+    cost: 500,
+    exhausted: false,
+  },
+  {
+    name: "FAT TAIL",
+    description: "Their tails are now fatter than ever before. \nDoubles hamster production",
+    cost: 1000,
+    exhausted: false
+  },
+  {
+    name: "Potion o' Haste",
+    description: "A haste potion... \nDoubles hamster production",
+    cost: 10000,
+    exhausted: false
+  },
+  // farmer upgrades
+  {
+    name: "Bigger Hoes",
+    description: "We bought them bigger hoes. \nDoubles farmer production",
+    cost: 1000,
+    exhausted: false
+  },
+  {
+    name: "Scarecrows",
+    description: "To keep away the birds! \nDoubles farmer production",
+    cost: 5555,
+    exhausted: false
+  },
+  {
+    name: "Fertilizers",
+    description: "Makes cheese crops grow faster. \nDoubles farmer production",
+    cost: 15151,
+    exhausted: false
+  },
+  // farm upgrades
+  {
+    name: "Goats",
+    description: "We have goats in the farms now, the goats are the G.O.A.T.s. \nDoubles cattle farm production",
+    cost: 5432,
+    exhausted: false,
+  },
+  {
+    name: "Bigger Pens",
+    description: "More cows, less cows runnign away. \nDoubles cattle farm production.",
+    cost: 12345,
+    exhausted: false,
+  },
+  {
+    name: "Disable Entity Cramming",
+    description: "CRAM THOSE COWS OR GOATS OR WHATEVER'S IN THERE IN, YEAH LIKE THAT. \nDoubles cattle farm production",
+    cost: 69696,
+    exhausted: false
   }
 ];
 
@@ -86,7 +137,7 @@ const buildingProgression = [
     cps: 5,
     cost: 250,
     description:
-      "He's one of us, he can understand you better and work faster!",
+      "A nice farmer to grow cheese crops. \nHe's one of us, he can understand you better and work faster!",
     url: "./assets/Farmer.webp"
   },
   {
@@ -294,6 +345,33 @@ const Game = {
       case "Electric Tails":
         return Game.buildings["Rat worker"].number >= 25;
         break;
+      case "Hamster Wheel":
+        return Game.buildings["Hamster worker"].number >= 5;
+        break;
+      case "FAT TAIL":
+        return Game.buildings["Hamster worker"].number >= 10;
+        break;
+      case "Potion o' Haste":
+        return Game.buildings["Hamster worker"].number >= 25;
+        break;
+      case "Bigger Hoes":
+        return Game.buildings["Farmer"].number >= 5;
+        break;
+      case "Scarecrows":
+        return Game.buildings["Farmer"].number >= 10;
+        break;
+      case "Fertilizers":
+        return Game.buildings["Farmer"].number >= 25;
+        break;
+      case "Goats":
+        return Game.buildings["Cattle farm"].number >= 5;
+        break;
+      case "Bigger Pens":
+        return Game.buildings["Cattle farm"].number >= 10;
+        break;
+      case "Disable Entity Cramming":
+        return Game.buildings["Cattle farm"].number >= 25;
+        break;
     }
   },
   activateUpgrade(upgrade) {
@@ -306,6 +384,24 @@ const Game = {
       case "Lazer Eyes":
       case "Electric Tails":
         Game.buildings["Rat worker"].baseCPS *= 2;
+        Game.update();
+        break;
+      case "Hamster Wheel":
+      case "FAT TAIL":
+      case "Potion o' Haste":
+        Game.buildings["Hamster worker"].baseCPS *= 2;
+        Game.update();
+        break;
+      case "Bigger Hoes":
+      case "Scarecrows":
+      case "Fertilizers":
+        Game.buildings["Farmer"].baseCPS *= 2;
+        Game.update();
+        break;
+      case "Goats":
+      case "Bigger Pens":
+      case "Disable Entity Cramming":
+        Game.buildings["Cattle farm"].baseCPS *= 2;
         Game.update();
         break;
     }
