@@ -9,6 +9,17 @@ const saveButton = document.querySelector("#get-save");
 
 const buffdesc = document.querySelector("#buff-desc");
 
+function suffixes(num) {
+    const SUFFIXES = ['Thousand','Million', 'Billion', 'Trillion', 'Quadrillion', 'Quintillion', 'Sextillion', 'Septillion', 'Octillion', 'Nonillion', 'Decillion', 'Undecillion', 'Duodecillion', 'Tredecillion', 'Quattuordecillion', 'Quindecillion', 'Sedecillion', 'Septendecillion', 'Octodecillion', 'Novendecillion', 'Vigintillion', 'Unvigintillion', 'Duovigintillion', 'Tresvigintillion', 'Quattuor­vigint­illion', 'Quinvigintillion', 'Sesvigintillion', 'Septemvigintillion', 'Octovigintillion', 'Novemvigintillion', 'Trigintillion', 'Untrigintillion', 'Duotrigintillion', 'Trestrigintillion', 'Quattuor­trigint­illion', 'Quintrigintillion', 'Sestrigintillion', 'Septentrigintillion', 'Octotrigintillion', 'Noventrigintillion', 'Quadragintillion', 'Quinquagintillion', 'Sexagintillion', 'Septuagintillion', 'Octogintillion', 'Nonagintillion', 'Centillion', 'Uncentillion', 'Decicentillion', 'Undecicentillion', 'Viginticentillion', 'Unviginticentillion', 'Trigintacentillion', 'Quadra­gintacent­illion', 'Quinqua­gintacent­illion', 'Sexagintacentillion', 'Septuagintacentillion', 'Octogintacentillion', 'Nonagintacentillion', 'Ducentillion', 'Trecentillion', 'Quadringentillion', 'Quingentillion', 'Sescentillion', 'Septingentillion', 'Octingentillion', 'Nongentillion', 'Millinillion']
+    if (num === 0) {
+      return num;
+    }
+    var power = Math.floor(Math.log10(num));
+    var index = Math.floor(power / 3);
+    num = Math.round(num * 10 / Math.pow(10, (index * 3))) / 10;
+    return num + " " + (SUFFIXES[index - 1] || '');
+}
+
 const upgradeProgression = [
   // click upgrades
   {
@@ -32,14 +43,26 @@ const upgradeProgression = [
     description: "They have lazer eyes now???? Doubles rat production",
     cost: 444,
     exhausted: false,
+    url: "./assets/laser.webp"
   },
   {
     name: "Electric Tails",
     description: "You might as well call 'em pikachu now. \nDoubles rat production.",
     cost: 888,
     exhausted: false,
+  },
+  // hamster upgrades
+  {
+    name: "Hamster Wheel",
+    description: "A nice hamster wheel for your hamsters to exercise. \nDoubles hamster production,",
+    cost: 100
   }
 ];
+
+upgradeProgression.sort(
+  (a, b) => a.cost > b.cost ? 1 : -1
+);
+
 const buildingProgression = [
   {
     name: "Rat worker",
@@ -61,12 +84,14 @@ const buildingProgression = [
     cost: 250,
     description:
       "He's one of us, he can understand you better and work faster!",
+    url: "./assets/Farmer.webp"
   },
   {
     name: "Cattle farm",
     cps: 15,
     cost: 1000,
     description: "FRESH FRESH MILKSIES",
+    url: "./assets/cow.webp"
   },
   {
     name: "Dairy",
@@ -140,7 +165,7 @@ const Game = {
       building.nameNode.textContent = name.textContent = building.name;
       let cost = (building.costNode = document.createElement("span"));
       building.costNode.textContent = cost.textContent =
-        building.cost + "🧀";
+        suffixes(building.cost) + " 🧀";
       let cps = (building.cpsNode = document.createElement("span"));
       building.cpsNode.textContent = cps.textContent = "cps: " + building.baseCPS;
       let number = (building.numberNode = document.createElement("span"));
@@ -190,7 +215,7 @@ const Game = {
       h1.textContent = upgrade.name;
       let cost = document.createElement("h2");
       cost.classList.add("bold");
-      cost.textContent = upgrade.cost + " cheese";
+      cost.textContent = suffixes(upgrade.cost) + " cheese";
       let desc = document.createElement("p");
       desc.textContent = upgrade.description;
       infoNode.appendChild(h1);
@@ -202,8 +227,8 @@ const Game = {
     }
   },
   update() {
-    cheeseCount.textContent = roundToN(this.cheese, 2);
-    cpsCount.textContent = roundToN(this.cps, 2);
+    cheeseCount.textContent = suffixes(this.cheese);
+    cpsCount.textContent = suffixes(this.cps);
     Game.cps = 0;
     this.buffs.forEach((buff) => {
       switch (buff.type) {
@@ -233,7 +258,7 @@ const Game = {
     });
     for (let key in this.buildings) {
       let building = this.buildings[key];
-      building.costNode.textContent = building.cost + "🧀";
+      building.costNode.textContent = suffixes(building.cost) + " 🧀";
       building.numberNode.textContent = building.number;
       building.cpsNode.textContent = "cps: " + building.baseCPS;
       if (building.cps !== this.multiplier * building.baseCPS) {
@@ -254,29 +279,29 @@ const Game = {
   },
   showUpgrade(upgrade) {
     switch (upgrade.name) {
-      case upgradeProgression[0].name:
-        return Game.clicks >= 1000;
+      case "Cheesy Fingers":
+        return Game.clicks >= 100;
         break;
-      case upgradeProgression[1].name:
+      case "Reinforced Tails":
         return Game.buildings["Rat worker"].number >= 5;
         break;
-      case upgradeProgression[2].name:
+      case "Lazer Eyes":
         return Game.buildings["Rat worker"].number >= 10;
         break;
-      case upgradeProgression[3].name:
+      case "Electric Tails":
         return Game.buildings["Rat worker"].number >= 25;
         break;
     }
   },
   activateUpgrade(upgrade) {
     switch (upgrade.name) {
-      case upgradeProgression[0].name:
+      case "Cheesy Fingers":
         Game.clickPower *= 2;
         Game.update();
         break;
-      case upgradeProgression[1].name:
-      case upgradeProgression[2].name:
-      case upgradeProgression[3].name:
+      case "Reinforced Tails":
+      case "Lazer Eyes":
+      case "Electric Tails":
         Game.buildings["Rat worker"].baseCPS *= 2;
         Game.update();
         break;
