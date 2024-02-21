@@ -52,12 +52,14 @@ body {
     display: flex;
     flex-direction: column-reverse;
     flex: 1;
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
     padding-top: 8rem;
+    width: 50%;
 }
 
 .buildings {
     border: 3px solid black;
+    overflow: scroll;
 }
 
 .building-std {
@@ -95,13 +97,13 @@ body {
 
 .building-std:hover .building-std-hidden {
     display: block;
-    position: absolute;
+    position: fixed;
     background-color: #170d0c;
     color: white;
     width: 12rem;
     height: 8rem;
-    right: 0;
-    bottom: 2rem;
+    right: 0.5rem;
+    bottom: 4rem;
     padding: 1rem;
     z-index: 999;
 }
@@ -117,7 +119,13 @@ body {
     width: calc(100%-6px);
     border: 3px solid black;
     display: flex;
-    height: 4rem;
+    overflow: hidden;
+    flex: 1 0 auto;
+}
+
+.upgrades:hover {
+    overflow: visible;
+    flex-wrap: wrap;
 }
 
 .upgrade-std {
@@ -125,6 +133,7 @@ body {
     width: 4rem;
     height: 4rem;
     position: relative;
+    flex-shrink: 0;
 }
 .upgrade-std-info {
     background-color: #170d0c;
@@ -152,10 +161,10 @@ body {
 
 .upgrade-std:hover .upgrade-std-info {
     display: block;
-    position: absolute;
+    position: fixed;
     padding: 1rem;
-    left: 1rem;
-    bottom: 2rem;
+    right: 48rem;
+    top: 8rem;
     z-index: 999;
     height: 6rem;
 }
