@@ -420,6 +420,16 @@ const Game = {
     )}px`;
     let buffn = this.newBuff(buff);
     document.body.appendChild(buffnode);
+    setTimeout(
+      () => {
+        
+        if ([...document.body.children].indexOf(buffnode) !== -1) {
+          buffnode.classList.add("golden")
+          setTimeout(() => {
+            document.body.removeChild(buffnode)
+          }, 490)
+        }
+      }, 10000)
     buffnode.addEventListener('click', () => {
       document.body.removeChild(buffnode);
       this.activateBuff(buffn);
@@ -428,6 +438,7 @@ const Game = {
       `${buffn.name}! ${
       buffn.multiplier}x ${buffn.type} for ${buffn.duration / 1000} seconds!`
       buffdesc.appendChild(r);
+      
       setTimeout(
         () => {
           buffdesc.removeChild(r);
