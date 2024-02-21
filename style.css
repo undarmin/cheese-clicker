@@ -8,6 +8,11 @@
     font-size: 1.0rem;
 }
 
+.golden {
+    animation-name: disappear;
+    animation-duration: 500ms;
+}
+
 button {
     padding: 0.25rem 0.375rem;
     font-size: 1.05rem;
@@ -181,4 +186,13 @@ body {
         transform: scale(1);
     }
 
+}
+
+@keyframes disappear {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(0);
+    }
 }
