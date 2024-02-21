@@ -14,6 +14,9 @@ function suffixes(num) {
     if (num === 0) {
       return num;
     }
+    if (num < 1) {
+      return Math.round(num*10)/10;
+    }
     var power = Math.floor(Math.log10(num));
     var index = Math.floor(power / 3);
     num = Math.round(num * 10 / Math.pow(10, (index * 3))) / 10;
