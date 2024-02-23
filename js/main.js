@@ -213,42 +213,9 @@ const Game = {
     for (let key in this.buildings) {
       // create building node
       let building = this.buildings[key];
-      let buildingNode = document.createElement("div");
-
-      let name = (building.nameNode = document.createElement("span"));
-      building.nameNode.textContent = name.textContent = building.name;
-      let cost = (building.costNode = document.createElement("span"));
-      building.costNode.textContent = cost.textContent =
-        suffixes(building.cost) + " 🧀";
-      let cps = (building.cpsNode = document.createElement("span"));
-      building.cpsNode.textContent = cps.textContent = "cps: " + building.baseCPS;
-      let number = (building.numberNode = document.createElement("span"));
-      building.numberNode.textContent = number.textContent =
-        building.number;
-      let hiddenNode = document.createElement("div");
-      let img = document.createElement("img");
-      img.src = building.url;
-      img.style.height = "3lh";
-      img.style.width = '3lh';
-      hiddenNode.classList.add("building-std-hidden");
-      let name2 = document.createElement("h1");
-      name2.textContent = building.name;
-      hiddenNode.appendChild(name2);
-      hiddenNode.appendChild(cps)
-      let desc = document.createElement("p");
-      desc.classList.add("small");
-      desc.textContent = building.description;
-      hiddenNode.appendChild(desc);
-
-      buildingNode.appendChild(img);
-      buildingNode.appendChild(number);
-      buildingNode.appendChild(name);
-      buildingNode.appendChild(cost);
-      buildingNode.appendChild(hiddenNode);
-      buildingNode.classList.add("building-std");
-      buildingsBar.appendChild(buildingNode);
-
-      // add event listener
+      building.createNode(buildingsBar);
+      let buildingNode = building.node;
+      
 
       buildingNode.addEventListener("click", () => {
         building.buy();
@@ -281,6 +248,7 @@ const Game = {
     }
   },
   update() {
+    console.log(this.cheese, this.cps)
     cheeseCount.textContent = suffixes(this.cheese);
     cpsCount.textContent = suffixes(this.cps);
     Game.cps = 0;
@@ -311,15 +279,16 @@ const Game = {
       }
     });
     for (let key in this.buildings) {
+
       let building = this.buildings[key];
-      building.costNode.textContent = suffixes(building.cost) + " 🧀";
-      building.numberNode.textContent = building.number;
-      building.cpsNode.textContent = "cps: " + building.baseCPS;
+      building.updateNode();
       if (building.cps !== this.multiplier * building.baseCPS) {
         building.cps = building.baseCPS * this.multiplier;
       }
+
       //   console.log(building);
       Game.cps += building.cps * building.number;
+
     }
     for (let key in this.upgrades) {
       let upgrade = this.upgrades[key];
@@ -413,45 +382,17 @@ const Game = {
   production() {
     setInterval(() => {
       for (let key in this.buildings) {
-        building = this.buildings[key];
-        // console.table({cookies:Game.cheese, cps:building.cps, number:building.number})
+        const building = this.buildings[key];
         this.earn(building.cps * building.number);
         this.update();
       }
     }, 1000);
   },
   earn(cheese) {
+    if (!this.cheese) {
+      this.cheese = 0;
+    }
     this.cheese += cheese;
-  },
-  addBuilding(name, cps, cost, description, url="") {
-    this.buildings[name] = {
-      name,
-      cps,
-      baseCPS: cps,
-      cost,
-      description,
-      number: 0,
-      costNode: null,
-      cpsNode: null,
-      nameNode: null,
-      numberNode: null,
-      url,
-      buy() {
-        //console.log(
-        //"oh noes",
-        //Game.cheese >= this.cost,
-        //Game.cheese,
-        //this.cost
-        //);
-        if (Game.cheese >= this.cost) {
-          //console.log("oh noes 2");
-          Game.cheese -= this.cost;
-          this.cost = roundToN(this.cost * 1.15, 2);
-          this.number++;
-          Game.update();
-        }
-      },
-    };
   },
   buildings: {},
   addUpgrade(name, description, cost, exhausted, url="") {
@@ -503,6 +444,7 @@ const Game = {
     return j;
   },
   createBuff(buff) {
+    
     let buffnode = document.createElement("div");
     buffnode.style.backgroundColor = "yellow";
     buffnode.style.position = "absolute";
@@ -515,6 +457,7 @@ const Game = {
       window.innerWidth - 100, 0
     )}px`;
     let buffn = this.newBuff(buff);
+   
     document.body.appendChild(buffnode);
     setTimeout(
       () => {
@@ -527,6 +470,14 @@ const Game = {
         }
       }, 10000)
     buffnode.addEventListener('click', () => {
+      console.log(this.buffs.indexOf(buffn) !== -1)
+      if (this.buffs.indexOf(buffn) !== -1) {
+        console.log(buffn);
+        this.buffs.splice(
+          this.buffs.indexOf(buffn), 1
+        );
+        this.multiplier /= buffn.multiplier;
+      }
       document.body.removeChild(buffnode);
       this.activateBuff(buffn);
       let r = document.createElement('span');
@@ -545,6 +496,84 @@ const Game = {
   buffs: [],
 };
 
+function Building(name, cps, cost, description, url) {
+  this.name = name;
+  this.baseCPS = cps;
+  this.cps = this.baseCPS * Game.multiplier;
+  this.cost = cost;
+  this.description = description;
+  this.url = url;
+  this.number = 0;
+  this.node = null;
+  this.childNodes = {};
+
+  this.createNode = (parent) => {
+    this.node = document.createElement('div');
+    this.node.classList.add("building-std");
+
+    const image = document.createElement('img');
+    image.src = this.url;
+    image.alt = this.name;
+    const number = document.createElement('span')
+    const name = document.createElement('span');
+    const cost = document.createElement('span');
+
+    number.textContent = this.number;
+    name.textContent = this.name;
+    cost.textContent = this.cost;
+
+    this.childNodes.image = image;
+    this.childNodes.number = number;
+    this.childNodes.name = name;
+    this.childNodes.cost = cost;
+
+    const info = document.createElement("div");
+    info.classList.add("building-std-hidden");
+    const infoTitle = document.createElement("h1");
+    infoTitle.textContent = this.name;
+    const infoDescription = document.createElement("p");
+    infoDescription.classList.add("small");
+    infoDescription.textContent = this.description;
+    const infoCPS = document.createElement("span");
+    infoCPS.textContent = this.baseCPS;
+
+    this.childNodes.cps = infoCPS;
+
+    info.append(infoTitle, infoCPS, infoDescription);
+
+    this.node.append(image, number, name, cost, info);
+
+    parent.appendChild(this.node);
+  }
+
+  this.updateNode = () => {
+    if (this.node === null) {
+      this.createNode();
+    } else {
+      // do stuff
+      this.childNodes.number.textContent
+      = this.number;
+      this.childNodes.cost.textContent = this.cost;
+      this.childNodes.cps.textContent = this.baseCPS;
+      this.node.children[1] = this.childNodes.number;
+      this.node.children[3] = this.childNodes.cost;
+      this.node.children[4].children[2] = this.childNodes.cps;
+    }
+  }
+
+  this.buy = () => {
+    if (Game.cheese >= this.cost) {
+      
+      Game.cheese -= this.cost;
+      this.cost = roundToN(this.cost * 1.15, 1);
+      this.number++;
+      Game.update();
+    } else {
+      console.log("Not enough cheese");
+    }
+  }
+}
+
 setInterval(
   () => {
     let buffn = (random(0, 1) > 0.5) ?  
@@ -555,13 +584,10 @@ setInterval(
   , 300000)
 
 buildingProgression.forEach((building) => {
-  Game.addBuilding(
-    building.name,
-    building.cps,
-    building.cost,
-    building.description,
-    building.url
+  const bld = new Building(
+    building.name, building.cps, building.cost, building.description, building.url
   );
+  Game.buildings[building.name] = bld;
 });
 
 upgradeProgression.forEach((upgrade) => {
