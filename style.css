@@ -72,6 +72,11 @@ body {
     align-items: center;
 }
 
+.building-std img {
+    height: 3lh;
+    width: 3lh;
+}
+
 .building-std span:nth-child(2) {
     font-size: 2rem;
     font-weight: bolder;
@@ -84,6 +89,10 @@ body {
 .building-std span:nth-child(4) {
     margin-left: auto;
     font-size: 0.9rem;
+}
+
+.building-std span:nth-child(4)::after {
+    content: " 🧀";
 }
 
 .building-std-hidden {
@@ -112,6 +121,15 @@ body {
     font-size: 0.9rem;
 }
 
+.building-std-hidden span::before {
+    content: "cps: ";
+    font-weight:700;
+}
+
+.building-std-hidden span {
+    font-size: 0.7rem;
+    font-weight: 400;
+}
 .building-std-hidden p {
     font-size: 0.7rem;
 }
